@@ -9,10 +9,75 @@
   const nav = $("#nav");
   const toTop = $("#toTop");
   let ticking = false;
+
+  /* ---------- Scroll progress squiggle (draws left → right) ---------- */
+  const squiggle = $("#scrollLine");
+  const sqSvg = squiggle && $(".scroll-line__svg", squiggle);
+  const sqTrack = squiggle && $(".scroll-line__track", squiggle);
+  const sqDraw = squiggle && $(".scroll-line__draw", squiggle);
+  const sqTip = squiggle && $(".scroll-line__tip", squiggle);
+  let sqLen = 0;
+
+  /* Hand-drawn looking wave: alternating quadratic humps across the width. */
+  const wavePath = (w, h) => {
+    const mid = h / 2;
+    const amp = Math.min(6.5, h / 4);
+    const step = w < 640 ? 82 : 128;
+    let d = `M 0 ${mid.toFixed(2)}`;
+    let x = 0, dir = 1;
+    while (x < w - 0.5) {
+      const seg = Math.min(step, w - x);
+      d += ` q ${(seg / 2).toFixed(2)} ${(amp * dir * 1.7).toFixed(2)} ${seg.toFixed(2)} 0`;
+      x += seg; dir *= -1;
+    }
+    return d;
+  };
+
+  const layoutProgress = () => {
+    if (!squiggle) return;
+    const w = squiggle.clientWidth;
+    const h = squiggle.clientHeight;
+    if (!w || !h) return;
+    sqSvg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    const d = wavePath(Math.max(0, w - 18), h);   // room for the arrow head
+    sqTrack.setAttribute("d", d);
+    sqDraw.setAttribute("d", d);
+    sqLen = sqDraw.getTotalLength();
+    sqDraw.style.strokeDasharray = String(sqLen);
+    squiggle.classList.add("is-ready");
+    drawProgress();
+  };
+
+  const drawProgress = () => {
+    if (!squiggle || !sqLen) return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    const at = sqLen * p;
+    sqDraw.style.strokeDashoffset = String(sqLen - at);
+    squiggle.classList.toggle("is-active", p > 0.004);
+    if (p > 0.004) {
+      const pt = sqDraw.getPointAtLength(at);
+      const back = sqDraw.getPointAtLength(Math.max(0, at - 3));
+      const ang = Math.atan2(pt.y - back.y, pt.x - back.x) * 180 / Math.PI;
+      sqTip.setAttribute("transform", `translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)}) rotate(${ang.toFixed(2)})`);
+    }
+  };
+
+  if (squiggle) {
+    layoutProgress();
+    let sqTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(sqTimer);
+      sqTimer = setTimeout(layoutProgress, 150);
+    }, { passive: true });
+    window.addEventListener("load", layoutProgress);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutProgress);
+  }
   const onScroll = () => {
     const y = window.scrollY;
     nav.classList.toggle("is-scrolled", y > 20);
     toTop.classList.toggle("is-visible", y > 600);
+    drawProgress();
     ticking = false;
   };
   window.addEventListener("scroll", () => {

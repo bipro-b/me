@@ -29,6 +29,15 @@
   <button class="nav__toggle" id="menuOpen" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
 </header>
 
+<!-- ============ SCROLL PROGRESS SQUIGGLE ============ -->
+<div class="scroll-line" id="scrollLine" aria-hidden="true">
+  <svg class="scroll-line__svg" preserveAspectRatio="none" focusable="false">
+    <path class="scroll-line__track"></path>
+    <path class="scroll-line__draw"></path>
+    <path class="scroll-line__tip" d="M -12 -6 L 0 0 L -12 6"></path>
+  </svg>
+</div>
+
 <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Mobile menu" aria-hidden="true" inert>
   <div class="drawer__top">

@@ -214,6 +214,37 @@ body::after {
   font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1; letter-spacing: -.02em;
 }
 
+/* ---------- Scroll progress squiggle ---------- */
+.scroll-line {
+  position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 45;
+  height: 26px; pointer-events: none;
+  opacity: 0; transition: opacity .4s var(--ease);
+}
+@media (min-width: 768px) { .scroll-line { height: 34px; } }
+.scroll-line.is-ready { opacity: 1; }
+/* soft scrim so the line stays legible over whatever scrolls beneath it */
+.scroll-line::before {
+  content: ""; position: absolute; inset: -1px 0 0;
+  background: linear-gradient(to bottom, rgba(10,11,13,.9), rgba(10,11,13,0));
+}
+.scroll-line__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.scroll-line__track {
+  fill: none; stroke: var(--red-line); stroke-width: 1.5;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.scroll-line__draw {
+  fill: none; stroke: var(--red); stroke-width: 2.5;
+  stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px var(--red-mid));
+}
+.scroll-line__tip {
+  fill: none; stroke: var(--red); stroke-width: 2.5;
+  stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px var(--red-mid));
+  opacity: 0; transition: opacity .25s var(--ease);
+}
+.scroll-line.is-active .scroll-line__tip { opacity: 1; }
+
 /* ---------- Sections ---------- */
 .section, .banner { position: relative; border-bottom: 1px solid #000; }
 .section { padding-block: clamp(56px, 9vw, 80px); }
@@ -253,21 +284,21 @@ body::after {
 /* Hero art — scales as one unit */
 .banner__right { display: flex; justify-content: center; }
 .hero-art {
-  --s: min(1, calc((100vw - 32px) / 440));   /* shrink on narrow screens */
-  position: relative; width: calc(440px * var(--s)); aspect-ratio: 1; flex-shrink: 0;
+  position: relative; width: min(440px, 100vw - 32px);   /* shrink on narrow screens */
+  max-width: 100%; aspect-ratio: 1; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
 }
-@media (min-width: 1024px) { .hero-art { --s: min(1, calc(50vw / 480)); } }
+@media (min-width: 1024px) { .hero-art { width: min(440px, 50vw - 24px); } }
 .ring { position: absolute; border-radius: 50%; }
 .ring--outer { width: 95.5%; height: 95.5%; border: 1.5px dashed var(--red-mid); animation: spinSlow 18s linear infinite; }
 .ring--inner { width: 77%; height: 77%; border: 1px dashed #ffffff18; animation: spinSlow 12s linear infinite reverse; }
 
 .portrait {
-  position: relative; z-index: 10; overflow: hidden;
-  width: 63.6%; aspect-ratio: 280 / 350; border-radius: 16px;
+  position: relative; z-index: 10; overflow: hidden; flex: none;
+  width: 63.6%; max-width: 100%; aspect-ratio: 280 / 350; border-radius: 16px;
   border: 2px solid var(--red-line); box-shadow: 0 0 40px var(--red-dim), 0 0 80px #0000004d;
 }
-.portrait img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.portrait img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 .portrait__corner { position: absolute; width: 40px; height: 40px; z-index: 20; }
 .portrait__corner--tl { top: 0; left: 0; border-top: 3px solid var(--red); border-left: 3px solid var(--red); border-radius: 16px 0 0 0; }
 .portrait__corner--br { bottom: 0; right: 0; border-bottom: 3px solid var(--red); border-right: 3px solid var(--red); border-radius: 0 0 16px 0; }
